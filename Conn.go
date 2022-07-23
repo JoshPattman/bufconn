@@ -131,11 +131,11 @@ type C struct {
 // ReadMsg reads an entire message (string ending with the delimer) from the buffer. It will wait for it to become available.
 // If the timeout is reached, this function will return an error. If the timeout is zero, then no timeout will be used.
 // It does NOT include the delimeter in the return
-func (c *C) ReadMsg(timeout time.Duration) ([]byte, error) {
+func (c *C) ReadMsg(timeout time.Duration) (string, error) {
 	now := time.Now()
 	for {
 		if time.Since(now) > timeout && timeout != 0 {
-			return []byte{}, errors.New("message read timeout")
+			return "", errors.New("message read timeout")
 		}
 		c.Conn.updateWholeBuffer()
 		for i, b := range c.Conn.readBuf {
@@ -143,7 +143,7 @@ func (c *C) ReadMsg(timeout time.Duration) ([]byte, error) {
 				out := make([]byte, i+1)
 				copy(out, c.Conn.readBuf)
 				c.Conn.readBuf = c.Conn.readBuf[i+1:]
-				return out[:len(out)-1], nil
+				return string(out[:len(out)-1]), nil
 			}
 		}
 	}
